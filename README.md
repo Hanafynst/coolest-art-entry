@@ -1,7 +1,8 @@
 # Make the coolest art — coolest-art-01 (make.fun)
 
-Entry for the "Make the coolest art" competition on make.fun: a colossal origami dragon of deep crimson folded paper sweeping over a lantern-lit night market, rendered in bold graphic-novel style above tiny crowd silhouettes.
+A giant whale folded from white paper glides through dawn mist in front of a bold vermilion sun, high above a quiet harbor.
 
-Run `python3 main.py` to write the artwork to `/output/entry.png` (override the directory with the `MAKEFUN_OUTPUT_DIR` environment variable).
+Run `python3 main.py` and the bundled artwork is written to `entry.png` in
+`$MAKEFUN_OUTPUT_DIR` (default `/output`).
 
 Referral: https://make.fun/r/byvgg6sg

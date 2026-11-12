@@ -1,40 +1,49 @@
-"""Emit the entry artwork for make.fun's "Make the coolest art".
+"""Emit the contest artwork: a colossal whale folded from white paper
+drifting through early-morning haze, a bright vermilion sun disc behind
+it and a still harbor spread out below.
 
-The picture shows a huge dragon folded from deep crimson paper,
-sweeping in a long curve above a night market strung with glowing
-lanterns, drawn in a bold graphic-novel style while tiny crowd
-silhouettes look up from the stalls below. This program simply
-copies the bundled JPEG to the output location, so the bytes it
-produces never change from run to run.
+The picture ships inside this repository as art.jpg. Running the program
+copies those exact bytes to entry.png inside the chosen output folder,
+so the produced file never changes between runs.
 """
 
 import hashlib
 import os
-import shutil
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-IMAGE = HERE / "art.jpg"
-SIZE_LIMIT = 1_048_576
+SOURCE = HERE / "art.jpg"
+MAX_BYTES = 1_048_576
+JPEG_MAGIC = b"\xff\xd8"
 
 
-def target_dir() -> Path:
-    return Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
+def load_source() -> bytes:
+    if not SOURCE.is_file():
+        raise FileNotFoundError(f"bundled artwork is missing: {SOURCE}")
+    data = SOURCE.read_bytes()
+    if not data.startswith(JPEG_MAGIC):
+        raise ValueError("art.jpg does not start with the JPEG magic bytes ff d8")
+    if len(data) > MAX_BYTES:
+        raise ValueError(
+            f"art.jpg weighs {len(data)} bytes, over the {MAX_BYTES} byte cap"
+        )
+    return data
 
 
-def main() -> None:
-    payload = IMAGE.read_bytes()
-    if payload[:2] != b"\xff\xd8":
-        raise ValueError("art.jpg lacks JPEG magic bytes ff d8; refusing to emit it")
-    if len(payload) > SIZE_LIMIT:
-        raise ValueError(f"art.jpg is {len(payload)} bytes, above the {SIZE_LIMIT} byte cap")
-    out_dir = target_dir()
+def main() -> int:
+    out_dir = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
     out_dir.mkdir(parents=True, exist_ok=True)
-    dest = out_dir / "entry.png"
-    shutil.copyfile(IMAGE, dest)
-    digest = hashlib.sha256(dest.read_bytes()).hexdigest()
-    print(f"wrote {dest} ({len(payload)} bytes, sha256 {digest})")
+    target = out_dir / "entry.png"
+
+    data = load_source()
+    with open(target, "wb") as handle:
+        handle.write(data)
+
+    digest = hashlib.sha256(data).hexdigest()
+    print(f"wrote {target} ({len(data)} bytes, sha256 {digest})")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

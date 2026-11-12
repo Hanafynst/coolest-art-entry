@@ -1,11 +1,7 @@
-# Coolest Art — make.fun entry
+# Make the coolest art — coolest-art-01 (make.fun)
 
-This entry's program (`main.py`) copies the bundled generated image
-`art.jpg` to the output path (`entry.png`) deterministically: it runs
-no generation and uses no randomness, so every run produces exactly
-the same bytes.
+Entry for the "Make the coolest art" competition on make.fun: a colossal origami dragon of deep crimson folded paper sweeping over a lantern-lit night market, rendered in bold graphic-novel style above tiny crowd silhouettes.
 
-The image shows a monumental origami crane made of dull cracked
-paper, standing in a rainy neon megacity intersection at night, with
-brilliant white light glowing out from the cracks in its paper body
-and reflections shimmering on the wet asphalt.
+Run `python3 main.py` to write the artwork to `/output/entry.png` (override the directory with the `MAKEFUN_OUTPUT_DIR` environment variable).
+
+Referral: https://make.fun/r/byvgg6sg

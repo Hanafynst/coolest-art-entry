@@ -1,33 +1,39 @@
-"""Write our picture to /output/entry.png.
+"""Emit the entry artwork for make.fun's "Make the coolest art".
 
-The picture is a generated image: a monumental origami crane of dull
-cracked paper standing in a rain-wet futuristic megacity intersection
-at night, brilliant white light glowing from the cracks in the paper,
-wet asphalt reflections, one bold silhouette. The program only copies
-the bundled image, so every run writes the same bytes.
+The picture shows a huge dragon folded from deep crimson paper,
+sweeping in a long curve above a night market strung with glowing
+lanterns, drawn in a bold graphic-novel style while tiny crowd
+silhouettes look up from the stalls below. This program simply
+copies the bundled JPEG to the output location, so the bytes it
+produces never change from run to run.
 """
 
+import hashlib
 import os
 import shutil
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SOURCE = HERE / "art.jpg"
-MAX_BYTES = 1_048_576
-OUT_DIR = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
+IMAGE = HERE / "art.jpg"
+SIZE_LIMIT = 1_048_576
+
+
+def target_dir() -> Path:
+    return Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
 
 
 def main() -> None:
-    data = SOURCE.read_bytes()
-    if not data.startswith(b"\xff\xd8"):
-        found = data[:2].hex() if data else "empty file"
-        raise ValueError(f"art.jpg is not a JPEG image: expected magic bytes ffd8, found {found}")
-    if len(data) > MAX_BYTES:
-        raise ValueError(f"art.jpg is {len(data)} bytes, over the {MAX_BYTES} byte limit")
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out = OUT_DIR / "entry.png"
-    shutil.copyfile(SOURCE, out)
-    print(f"wrote {out} ({len(data)} bytes)")
+    payload = IMAGE.read_bytes()
+    if payload[:2] != b"\xff\xd8":
+        raise ValueError("art.jpg lacks JPEG magic bytes ff d8; refusing to emit it")
+    if len(payload) > SIZE_LIMIT:
+        raise ValueError(f"art.jpg is {len(payload)} bytes, above the {SIZE_LIMIT} byte cap")
+    out_dir = target_dir()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    dest = out_dir / "entry.png"
+    shutil.copyfile(IMAGE, dest)
+    digest = hashlib.sha256(dest.read_bytes()).hexdigest()
+    print(f"wrote {dest} ({len(payload)} bytes, sha256 {digest})")
 
 
 if __name__ == "__main__":
